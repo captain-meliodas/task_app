@@ -1,0 +1,1 @@
+# This will define a abstract class for implementing a db connection class
