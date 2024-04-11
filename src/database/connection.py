@@ -1,21 +1,31 @@
 
-from abc import ABC
+from abc import ABC, abstractmethod
 class DbCrud(ABC):
     """ This is the abstract class who defines the crud methods needs to be implemented for Mongo CRUDs"""
     
-    def create(self,db,payload):
-        pass
-
-    def get_by_id(self,db,id):
-        pass
-    
-    def get_all(self,db):
+    @abstractmethod
+    def create_task(self,db,payload):
+        """Create the task from the given payload"""
         pass
     
-    def update(self,db,updated_payload):
+    @abstractmethod
+    def get_task_by_id(self,db,_id):
+        """Get the task by id"""
         pass
-
-    def remove(self,db,id):
+    
+    @abstractmethod
+    def get_tasks(self,db, skip=0, limit=100):
+        """method to get tasks with paginated response"""
+        pass
+    
+    @abstractmethod
+    def update_task(self,db,updated_payload):
+        """method to update the task details"""
+        pass
+    
+    @abstractmethod
+    def remove(self,db,_id):
+        """method to delete the task details"""
         pass
 
 class DbConnection:

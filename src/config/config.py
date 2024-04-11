@@ -18,9 +18,9 @@ class Settings(BaseSettings):
     # Application environment variables - DataBase
     mongo_host: str = "localhost"
     mongo_port: int = 27017
-    mongo_username: str = ""
-    mongo_password: str = ""
-    db_name: str = "task_application"
+    mongo_username: str = "root"
+    mongo_password: str = "example"
+    db_name: str = "task_app"
     
     @classmethod
     def get_settings(cls):
