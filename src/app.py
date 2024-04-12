@@ -2,7 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.config.config import Settings
-from src.routes.tasks import router
+from src.routes.tasks import task_router
+from src.routes.users import users_router
 
 def main_app():
     settings = Settings.get_settings()
@@ -21,6 +22,7 @@ def main_app():
     )
 
     #Add routes for the application
-    app.include_router(router)
+    app.include_router(task_router)
+    app.include_router(users_router)
 
     return app

@@ -21,6 +21,10 @@ class Settings(BaseSettings):
     mongo_username: str = "root"
     mongo_password: str = "example"
     db_name: str = "task_app"
+
+    # User related environment variables
+    hash_algorithm: str = "HS256" # you can change your encryption technique for jwt token
+    hash_key: str = "put_your_HS256_random_hash_key"
     
     @classmethod
     def get_settings(cls):
