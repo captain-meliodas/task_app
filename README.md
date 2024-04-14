@@ -1,6 +1,15 @@
 # task_app
 
-Task Application
+## How to run
+
+- run run_local.sh to bring up the mongo and app server (make sure run_local.sh should have executable permissions)
+- create a admin user using command `python3 -m scripts.generate_admin_user`
+- Default username and password for creating the token to access each API endpoints is: `username -> 'ankitsingh' and password ->  'AnkitSingh@23021995'`
+- Available APIs docs will be available at `localhost:8000/docs`
+
+### Note
+
+- Make sure docker and docker-compose commands should available in the system and docker daemon is running.
 
 # Task to implement
 
