@@ -1,14 +1,16 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Security
 from fastapi.security import (OAuth2PasswordBearer, SecurityScopes, OAuth2PasswordRequestForm)
+from fastapi.responses import JSONResponse
 from passlib.hash import sha256_crypt
 from src.database.connection import DbConnection
 from src.database.crud import MongoUserCrud
 from src.models.schemas import Users, TokenData, UserCreate, UsersResponse
-from src.constants import ALL_SCOPES
+from src.constants import ALL_SCOPES, DELETED_USER_MSG, USER_NOT_FOUND_MSG
 from src.config.config import Settings
 from jose import JWTError, jwt
+from typing import List
 
-
+settings = Settings.get_settings()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", scopes=ALL_SCOPES)
 crud = MongoUserCrud()
 
@@ -18,7 +20,7 @@ users_router = APIRouter(
     dependencies=[Depends(oauth2_scheme)],
     responses={
         404:  {
-            "description": "User not found"
+            "description": USER_NOT_FOUND_MSG
         }
     }
 )
@@ -39,7 +41,6 @@ async def get_current_user(security_scopes: SecurityScopes, conn=Depends(DbConne
         headers={"WWW-Authenticate": authenticate_value},
     )
     try:
-        settings = Settings.get_settings()
         payload = jwt.decode(token, settings.hash_key,
                                 algorithms=[settings.hash_algorithm])
         username: str = payload.get("sub")
@@ -75,6 +76,14 @@ async def get_current_active_user(current_user: Users = Depends(get_current_user
         raise HTTPException(status_code=403, detail="The user is disabled")
     return current_user
 
+@users_router.get("", response_model=List[UsersResponse])
+async def getUser(conn=Depends(DbConnection), admin_user: Users = Security(get_current_active_user, scopes=["admin:user"])):
+    """
+    This function reads current user based on GET call
+    :param current_user: dependency on get_current_active_user
+    """
+    users = crud.get_all(conn.db)
+    return users
 
 @users_router.get("/me", response_model=UsersResponse)
 async def getUser(current_user: Users = Depends(get_current_active_user)):
@@ -112,6 +121,22 @@ async def create_user(user: UserCreate, conn=Depends(DbConnection), admin_user: 
     if new_user.inserted_id:
         return crud.get_by_id(conn.db, str(new_user.inserted_id))
 
+@users_router.delete("/delete/{username}", response_model=UsersResponse)
+async def delete_user(username: str, conn=Depends(DbConnection), admin_user: Users = Security(get_current_active_user, scopes=["admin:user"])):
+    """
+    This function delete user based on POST call
+    :param user: userId a type of ObjectId string
+    :param conn: dependency injection to share database connection
+    """
+    old_user_deleted_count = crud.remove_by_name(conn.db, username)
+    if old_user_deleted_count:
+            return JSONResponse(status_code=200, content={
+            "message": DELETED_USER_MSG.format(username)
+        })
+
+    raise HTTPException(
+        status_code=404, detail=USER_NOT_FOUND_MSG)
+
 def verify_password(plain_password: str, hashed_password: str):
     """
     verify password compares plain_password with hashed password
@@ -144,7 +169,6 @@ def create_access_token(data: dict):
     :param data: data of type dict
     """
     to_encode = data.copy()
-    settings = Settings.get_settings()
     encoded_jwt = jwt.encode(to_encode, settings.hash_key,
                              algorithm=settings.hash_algorithm)
     return encoded_jwt

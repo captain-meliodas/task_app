@@ -25,7 +25,7 @@ class Users(BaseModel):
     email: str
     active: bool = True
     scopes: List[AuthScopeEnum]
-    created_by: PyObjectId
+    created_by: Optional[str]
     hashed_password: Optional[str]
 
 class UserCreate(Users):

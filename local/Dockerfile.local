@@ -1,0 +1,26 @@
+## Base Image
+FROM python:3.9-slim-bullseye
+
+## Setting environment variables
+ENV PYTHONPATH "${PYTHONPATH}:/usr/src/task_app"
+
+## Changing workdir
+WORKDIR /usr/src/task_app
+
+## Updating the base bullseye
+RUN apt update && \
+    apt upgrade -y && \
+    apt autoclean -y && \
+    apt autoremove -y
+
+## Add requirements first for amagi_library and amdb
+COPY requirements.txt requirements.txt
+
+## Install python packages
+RUN pip3 install -r requirements.txt
+
+## Add code into the docker
+COPY . .
+
+## Expose endpoint !
+EXPOSE 8000

@@ -21,13 +21,13 @@ class MongoTaskCrud(DbCrud):
         task = db.tasks.find_one({"_id":PyObjectId(_id)})
         return Tasks.parse_obj(task) if task else None
     
-    def get_all(self,db: Database, skip:int=0, limit: int=100):
+    def get_all(self,db: Database, tasks_filters, skip:int=0, limit: int=100):
         """method to get tasks with paginated response"""
 
         tasks = []
         index = 0
 
-        for task in db.tasks.find():
+        for task in db.tasks.find(tasks_filters):
             tasks.append(Tasks.parse_obj(task)) if index >= skip and len(tasks) < limit else None
             index += 1
         return tasks
@@ -70,7 +70,7 @@ class MongoUserCrud(DbCrud):
         index = 0
 
         for user in db.users.find():
-            users.append(Tasks.parse_obj(user)) if index >= skip and len(user) < limit else None
+            users.append(Users.parse_obj(user)) if index >= skip and len(user) < limit else None
             index += 1
         return users
     
@@ -81,8 +81,8 @@ class MongoUserCrud(DbCrud):
         logging.info(f"User: ${updated_payload.id} updated successfully")
         return user_obj
 
-    def remove_by_id(self,db: Database,_id: str):
+    def remove_by_name(self,db: Database,username: str):
         """method to delete the user details"""
 
-        user_obj = db.users.delete_one({"_id":PyObjectId(_id)})
+        user_obj = db.users.delete_one({"username":username})
         return user_obj.deleted_count

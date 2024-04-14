@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     
     # Application environment variables - Main App
     base_path: str = ""
-    cors_origins: str = "http://localhost,http://localhost:3000"
+    cors_origins: str = "http://localhost,http://localhost:8000"
     allowed_methods: List[str] = ['GET','PUT','POST','DELETE']
     bind_ip:str =  "0.0.0.0"
     port: int = 8000

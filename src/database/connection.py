@@ -23,10 +23,11 @@ class DbCrud(ABC):
         """method to update the task details"""
         pass
     
-    @abstractmethod
     def remove_by_id(self,db,_id):
         """method to delete the task details"""
         pass
+
+    
 
 class DbConnection:
     """Dependency class for providing the db connection to fastApi routes"""

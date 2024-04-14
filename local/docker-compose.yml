@@ -1,0 +1,43 @@
+#AMDB API is available at localhost:8000
+#Mongo Express service is avialable at localhost:8081 (Just for checking db entries)
+#export DEV_ARGO_TOKEN, CONFIG_MANAGER_S3_DETAILS or add them in you .bashrc file in order to create workflow on dev for testing purpose
+
+version: "3.1"
+
+services:
+  mongo:
+    image: mongo
+    restart: always
+    volumes:
+      - ~/mongo:/data/db
+    ports:
+      - 27017:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+
+  task_app:
+    build:
+      context: ../
+      dockerfile: local/Dockerfile.local
+
+    depends_on:
+      - mongo
+    restart: unless-stopped
+    command: ["python3", "-m", "main"]
+    environment:
+      CORS_ORIGINS: ${CORS_ORIGINS}
+      PORT: 8000
+      SSL_CERT: ${SSL_CERT}
+      SSL_KEY: ${SSL_KEY}
+      MONGO_HOST: mongodb://mongo
+      MONGO_PORT: ${MONGO_PORT}
+      MONGO_USERNAME: root
+      MONGO_PASSWORD: example
+      DB_NAME: task_app
+      HASH_ALGORITHM: ${HASH_ALGORITHM}
+      HASH_KEY: ${HASH_KEY}
+    volumes:
+      - ../:/usr/src/task_app
+    ports:
+      - "8000:8000"
