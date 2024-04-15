@@ -18,7 +18,7 @@ task_router = APIRouter(
 crud = MongoTaskCrud()
 
 @task_router.get("",response_model=List[Tasks])
-async def getAllTasks(status: Optional[Status],skip: int = 0, limit: int = 100, conn=Depends(DbConnection),current_user: Users = Security(get_current_active_user, scopes=["task:read"])):
+async def getAllTasks(status: Optional[Status] = None ,skip: int = 0, limit: int = 100, conn=Depends(DbConnection),current_user: Users = Security(get_current_active_user, scopes=["task:read"])):
     """Route to return all the tasks from db"""
     task_filters = {}
     if status:
@@ -41,6 +41,8 @@ async def getTask(task_id:str, conn=Depends(DbConnection), current_user: Users =
 async def createTask(payload: Tasks, conn=Depends(DbConnection),current_user: Users = Security(get_current_active_user, scopes=["task:write"])):
     """Route to return all the tasks from db"""
     
+    #set current user as creator of the task
+    payload.userId = current_user.username
     # create the task
     inserted_data = crud.create(conn.db,payload)
 
@@ -55,7 +57,10 @@ async def createTask(payload: Tasks, conn=Depends(DbConnection),current_user: Us
 @task_router.put("/update/{task_id}",response_model=Tasks)
 async def updateTask(task_id:str ,payload: Tasks, conn=Depends(DbConnection),current_user: Users = Security(get_current_active_user, scopes=["task:write"])):
     """Route to return all the tasks from db"""
-    
+
+    #get the task
+    task = crud.get_by_id(conn.db,task_id)
+        
     # update the task
     data = crud.update_by_id(conn.db,task_id,payload)
     if data.matched_count:

@@ -8,3 +8,6 @@ ALL_SCOPES = {
     "task:delete": "Delete the tasks present in database",
     "admin:user": "User with this permission able to create new users"
 }
+
+ADMIN_USER_NAME = "ankitsingh"
+ADMIN_USER_PASSWORD= "AnkitSingh@23021995"

@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from src.config.config import Settings
 from src.routes.tasks import task_router
 from src.routes.users import users_router
+from src.routes.token import token_router
 
 def main_app():
     settings = Settings.get_settings()
@@ -24,5 +25,6 @@ def main_app():
     #Add routes for the application
     app.include_router(task_router)
     app.include_router(users_router)
+    app.include_router(token_router)
 
     return app

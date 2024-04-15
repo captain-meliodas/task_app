@@ -51,9 +51,9 @@ class UsersResponse(BaseModel):
 class Tasks(BaseModel):
     id: Optional[PyObjectId] = Field(alias='_id')
     title: str
-    userId: PyObjectId
+    userId: Optional[str]
     status: Status = "Todo"
-    contributors: Optional[List[PyObjectId]]
+    contributors: Optional[List[str]]
 
     @validator('title')
     def validate_title(cls,title: str):
