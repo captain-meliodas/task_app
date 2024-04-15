@@ -20,7 +20,7 @@ crud = MongoTaskCrud()
 @task_router.get("",response_model=List[Tasks])
 async def getAllTasks(status: Optional[Status] = None ,skip: int = 0, limit: int = 100, conn=Depends(DbConnection),current_user: Users = Security(get_current_active_user, scopes=["task:read"])):
     """Route to return all the tasks from db"""
-    task_filters = {}
+    task_filters = {"userId": current_user.username}
     if status:
         task_filters["status"] = status
 
@@ -32,6 +32,7 @@ async def getTask(task_id:str, conn=Depends(DbConnection), current_user: Users =
     """Route to return all the tasks from db"""
 
     data = crud.get_by_id(conn.db,task_id)
+    isUserCanAccessTask(data,current_user)
     if not data:
         raise HTTPException(status_code=404,detail=TASK_NOT_FOUND_MSG)
     
@@ -60,7 +61,7 @@ async def updateTask(task_id:str ,payload: Tasks, conn=Depends(DbConnection),cur
 
     #get the task
     task = crud.get_by_id(conn.db,task_id)
-        
+    isUserCanAccessTask(task,current_user)
     # update the task
     data = crud.update_by_id(conn.db,task_id,payload)
     if data.matched_count:
@@ -73,8 +74,11 @@ async def updateTask(task_id:str ,payload: Tasks, conn=Depends(DbConnection),cur
 @task_router.delete("/delete/{task_id}")
 async def removeTask(task_id:str, conn=Depends(DbConnection),current_user: Users = Security(get_current_active_user, scopes=["task:write"])):
     """Route to return all the tasks from db"""
-    # remove the task
     
+    task = crud.get_by_id(conn.db,task_id)
+    isUserCanAccessTask(task,current_user)
+
+    # remove the task
     deleted_count = crud.remove_by_id(conn.db,task_id)
     if not deleted_count:
         raise HTTPException(status_code=404,detail=TASK_NOT_FOUND_MSG)
@@ -82,3 +86,8 @@ async def removeTask(task_id:str, conn=Depends(DbConnection),current_user: Users
     return JSONResponse(status_code=200, content={
         "message": DELETED_TASK_MSG.format(task_id)
     })
+
+def isUserCanAccessTask(task, current_user):
+    if task and task.userId != current_user.username:
+        raise HTTPException(status_code=401,detail="Unauthorized access to data")
+    return True
